@@ -121,11 +121,29 @@ function initAdminApp(){
   function clearForm(){Object.values(form).forEach(i=>{if(i.tagName==="INPUT")i.value="";});form.catFeatured.checked=false;form.catAll.checked=true;form.id.value="";}
   function readForm(){return {team1:form.team1.value.trim(),team2:form.team2.value.trim(),logo1:form.logo1.value.trim(),logo2:form.logo2.value.trim(),leagueLogo:form.leagueLogo.value.trim(),bg:form.bg.value.trim(),startISO:new Date(form.startISO.value).toISOString(),channel:form.channel.value.trim(),streamUrl:form.streamUrl.value.trim(),categories:{featured:form.catFeatured.checked,all:form.catAll.checked},createdAt:Date.now()};}
   function fillForm(m){form.id.value=m.id||"";form.team1.value=m.team1||"";form.team2.value=m.team2||"";form.logo1.value=m.logo1||"";form.logo2.value=m.logo2||"";form.leagueLogo.value=m.leagueLogo||"";form.bg.value=m.bg||"";form.startISO.value=m.startISO?new Date(m.startISO).toISOString().slice(0,16):"";form.channel.value=m.channel||"";form.streamUrl.value=m.streamUrl||"";form.catFeatured.checked=!!(m.categories&&m.categories.featured);form.catAll.checked=!!(m.categories&&m.categories.all);}
-  document.getElementById("btn-save").onclick=async()=>{
-    const data=readForm();
-    if(!data.team1||!data.team2||!data.startISO){alert("Vyplň názvy týmů a datum.");return;}
-    if(form.id.value){await update(ref(db,"matches/"+form.id.value),data);} else {const r=push(ref(db,"matches"));await set(r,data);}
+  document.getElementById("btn-save").onclick = async () => {
+  const data = readForm();
+  if (!data.team1 || !data.team2 || !data.startISO) {
+    alert("Vyplň názvy týmů a datum.");
+    return;
+  }
+
+  try {
+    if (form.id.value) {
+      await update(ref(db, "matches/" + form.id.value), data);
+      alert("Zápas byl aktualizován.");
+    } else {
+      const newRef = push(ref(db, "matches"));
+      await set(newRef, data);
+      alert("Zápas byl uložen.");
+    }
     clearForm();
+  } catch (e) {
+    console.error(e);
+    alert("Chyba při ukládání zápasu: " + e.message);
+  }
+};
+
   };
   document.getElementById("btn-new").onclick=()=>clearForm();
   const listWrap = document.getElementById("admin-list");
