@@ -17,18 +17,21 @@
     <a href="./index.html">Hlavní stránka</a>
     <a href="./index.html#all">Přenosy</a>
     <a href="./gdpr.html">GDPR</a>
-    <a href="./admin.html">Admin</a>
   </nav>
 </header>
 
 <div id="login" class="login">
-  <h2>Přihlášení</h2>
+  <h2>Admin přihlášení</h2>
+  <input id="admin-email" type="email" placeholder="E-mail">
   <input id="admin-pass" type="password" placeholder="Heslo">
   <button id="btn-login" class="button">Přihlásit</button>
 </div>
 
 <main id="admin-app" class="container hidden">
-  <h1 class="title">Správa přenosů</h1>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h1 class="title">Správa přenosů</h1>
+    <button id="btn-logout" class="button" style="background:transparent;border:2px solid var(--accent);color:var(--accent)">Odhlásit</button>
+  </div>
 
   <div class="form">
     <input id="m-id" type="hidden">
@@ -61,8 +64,7 @@
 
 <script type="module">
   import { mountAdmin } from "./scripts.js";
-  const ADMIN_PASSWORD = "HkJc-72Qf9Mx";
-  mountAdmin(ADMIN_PASSWORD);
+  mountAdmin();
 </script>
 
 <script type="text/javascript">
