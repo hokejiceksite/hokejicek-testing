@@ -23,7 +23,8 @@ function fmtCountdown(ts) {
 
 function card(match) {
   const id = "t"+Math.random().toString(36).slice(2,8);
-  const card = h("a",{href:match.streamUrl||"#",class:"card",target:match.streamUrl?"_blank":"_self"});
+  const link = match.streamUrl||"#";
+  const card = h("a",{href:link,class:"card",target:match.streamUrl?"_blank":"_self",rel:"noopener"});
   const thumb = h("div",{class:"thumb"});
   const bg = h("div",{class:"bg",style:`background-image:url('${match.bg||""}')`});
   const content = h("div",{class:"content"});
@@ -50,10 +51,14 @@ export function mountPublic() {
   const featuredWrap = document.getElementById("featured-grid");
   const allWrap = document.getElementById("all-grid");
   onValue(ref(db,"matches"), snap=>{
-    const data = snap.val()||{};
-    const list = Object.entries(data).map(([k,v])=>({id:k,...v})).sort((a,b)=>new Date(a.startISO)-new Date(b.startISO));
+    const data = snap.val();
     featuredWrap.innerHTML="";
     allWrap.innerHTML="";
+    if(!data) return;
+    const list = Object.entries(data)
+      .filter(([_,v])=>v && typeof v==="object")
+      .map(([k,v])=>({id:k,...v}))
+      .sort((a,b)=>new Date(a.startISO)-new Date(b.startISO));
     list.forEach(m=>{
       if(m.categories&&m.categories.featured) featuredWrap.appendChild(card(m));
       if(m.categories&&m.categories.all) allWrap.appendChild(card(m));
@@ -61,9 +66,9 @@ export function mountPublic() {
   });
 }
 
-async function checkAdmin(uid){
-  const snap = await get(ref(db,`admins/${uid}`));
-  return !!snap.val();
+async function isAdmin(uid){
+  const s = await get(ref(db,`admins/${uid}`));
+  return !!s.val();
 }
 
 export function mountAdmin() {
@@ -77,9 +82,8 @@ export function mountAdmin() {
   btnSignIn.onclick = async ()=>{
     try{
       const cred = await signInWithEmailAndPassword(auth, inputEmail.value.trim(), inputPass.value);
-      const uid = cred.user.uid;
-      const ok = await checkAdmin(uid);
-      if(!ok){ await signOut(auth); alert("Tento účet není admin. Kontaktuj vlastníka."); return; }
+      const ok = await isAdmin(cred.user.uid);
+      if(!ok){ await signOut(auth); alert("Účet nemá práva admin."); return; }
       loginEl.classList.add("hidden");
       appWrap.classList.remove("hidden");
       initAdminApp();
@@ -94,12 +98,10 @@ export function mountAdmin() {
 
   onAuthStateChanged(auth, async user=>{
     if(user){
-      const ok = await checkAdmin(user.uid);
+      const ok = await isAdmin(user.uid);
       if(ok){ loginEl.classList.add("hidden"); appWrap.classList.remove("hidden"); initAdminApp(); }
       else { await signOut(auth); }
-    } else {
-      appWrap.classList.add("hidden"); loginEl.classList.remove("hidden");
-    }
+    } else { appWrap.classList.add("hidden"); loginEl.classList.remove("hidden"); }
   });
 }
 
@@ -118,39 +120,78 @@ function initAdminApp(){
     catFeatured: document.getElementById("cat-featured"),
     catAll: document.getElementById("cat-all")
   };
-  function clearForm(){Object.values(form).forEach(i=>{if(i.tagName==="INPUT")i.value="";});form.catFeatured.checked=false;form.catAll.checked=true;form.id.value="";}
-  function readForm(){return {team1:form.team1.value.trim(),team2:form.team2.value.trim(),logo1:form.logo1.value.trim(),logo2:form.logo2.value.trim(),leagueLogo:form.leagueLogo.value.trim(),bg:form.bg.value.trim(),startISO:new Date(form.startISO.value).toISOString(),channel:form.channel.value.trim(),streamUrl:form.streamUrl.value.trim(),categories:{featured:form.catFeatured.checked,all:form.catAll.checked},createdAt:Date.now()};}
-  function fillForm(m){form.id.value=m.id||"";form.team1.value=m.team1||"";form.team2.value=m.team2||"";form.logo1.value=m.logo1||"";form.logo2.value=m.logo2||"";form.leagueLogo.value=m.leagueLogo||"";form.bg.value=m.bg||"";form.startISO.value=m.startISO?new Date(m.startISO).toISOString().slice(0,16):"";form.channel.value=m.channel||"";form.streamUrl.value=m.streamUrl||"";form.catFeatured.checked=!!(m.categories&&m.categories.featured);form.catAll.checked=!!(m.categories&&m.categories.all);}
-  document.getElementById("btn-save").onclick = async () => {
-  const data = readForm();
-  if (!data.team1 || !data.team2 || !data.startISO) {
-    alert("Vyplň názvy týmů a datum.");
-    return;
+
+  function clearForm(){
+    form.id.value="";
+    form.team1.value=""; form.team2.value="";
+    form.logo1.value=""; form.logo2.value="";
+    form.leagueLogo.value=""; form.bg.value="";
+    form.startISO.value=""; form.channel.value=""; form.streamUrl.value="";
+    form.catFeatured.checked=false; form.catAll.checked=true;
   }
 
-  try {
-    if (form.id.value) {
-      await update(ref(db, "matches/" + form.id.value), data);
-      alert("Zápas byl aktualizován.");
-    } else {
-      const newRef = push(ref(db, "matches"));
-      await set(newRef, data);
-      alert("Zápas byl uložen.");
-    }
-    clearForm();
-  } catch (e) {
-    console.error(e);
-    alert("Chyba při ukládání zápasu: " + e.message);
+  function readForm(){
+    const rawDate = form.startISO.value;
+    if(!rawDate) throw new Error("Zadej platný datum a čas.");
+    const d = new Date(rawDate);
+    if(isNaN(d.getTime())) throw new Error("Neplatný formát data.");
+    return {
+      team1: form.team1.value.trim(),
+      team2: form.team2.value.trim(),
+      logo1: form.logo1.value.trim(),
+      logo2: form.logo2.value.trim(),
+      leagueLogo: form.leagueLogo.value.trim(),
+      bg: form.bg.value.trim(),
+      startISO: d.toISOString(),
+      channel: form.channel.value.trim(),
+      streamUrl: form.streamUrl.value.trim(),
+      categories: { featured: form.catFeatured.checked, all: form.catAll.checked },
+      createdAt: Date.now()
+    };
   }
-};
 
+  function fillForm(m){
+    form.id.value=m.id||"";
+    form.team1.value=m.team1||"";
+    form.team2.value=m.team2||"";
+    form.logo1.value=m.logo1||"";
+    form.logo2.value=m.logo2||"";
+    form.leagueLogo.value=m.leagueLogo||"";
+    form.bg.value=m.bg||"";
+    form.startISO.value=m.startISO?new Date(m.startISO).toISOString().slice(0,16):"";
+    form.channel.value=m.channel||"";
+    form.streamUrl.value=m.streamUrl||"";
+    form.catFeatured.checked=!!(m.categories&&m.categories.featured);
+    form.catAll.checked=!!(m.categories&&m.categories.all);
+  }
+
+  document.getElementById("btn-save").onclick = async ()=>{
+    try{
+      const data=readForm();
+      if(!data.team1||!data.team2) { alert("Vyplň názvy týmů."); return; }
+      if(form.id.value){
+        await update(ref(db,"matches/"+form.id.value),data);
+        alert("Zápas aktualizován.");
+      } else {
+        const newRef = push(ref(db,"matches"));
+        await set(newRef,data);
+        alert("Zápas uložen.");
+      }
+      clearForm();
+    }catch(e){ alert("Chyba: "+e.message); }
   };
+
   document.getElementById("btn-new").onclick=()=>clearForm();
+
   const listWrap = document.getElementById("admin-list");
   onValue(ref(db,"matches"), snap=>{
-    const data=snap.val()||{};
-    const list=Object.entries(data).map(([k,v])=>({id:k,...v})).sort((a,b)=>new Date(a.startISO)-new Date(b.startISO));
+    const data = snap.val();
     listWrap.innerHTML="";
+    if(!data) return;
+    const list = Object.entries(data)
+      .filter(([_,v])=>v && typeof v==="object")
+      .map(([k,v])=>({id:k,...v}))
+      .sort((a,b)=>new Date(a.startISO)-new Date(b.startISO));
     list.forEach(m=>{
       const item=h("div",{class:"card"});
       const thumb=h("div",{class:"thumb"});
