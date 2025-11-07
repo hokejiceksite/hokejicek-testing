@@ -1,39 +1,51 @@
 @font-face{font-family:Inter;src:local("Inter"),local("Inter var")}
-:root{--bg:#0b0b0b;--panel:#111;--muted:#222;--text:#e9eef5;--primary:#57a1ff;--accent:#7bb1ff;--card:#121212;--shadow:0 10px 24px rgba(0,0,0,.45);--radius:18px}
+:root{
+  --bg:#0b0b0b;
+  --panel:#111;
+  --muted:#222;
+  --text:#e9eef5;
+  --accent:#ff914d;
+  --accent-2:#ffb88a;
+  --card:#121212;
+  --shadow:0 10px 24px rgba(0,0,0,.45);
+  --radius:18px
+}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
 a{text-decoration:none;color:inherit}
-.header{position:fixed;top:0;left:0;right:0;height:64px;background:#0e0e0e;border-bottom:1px solid #1b1b1b;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:1000}
-.header .brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.5px}
-.header .brand img{height:36px;width:auto}
-.nav{display:flex;align-items:center;gap:24px}
-.nav a{opacity:.9;transition:.2s ease}
-.nav a:hover{opacity:1;color:#fff}
-.container{max-width:1150px;margin:110px auto 80px;padding:0 20px}
-.title{font-size:42px;letter-spacing:1px;text-align:center;margin:10px 0 24px;color:var(--primary);font-weight:800}
+.header{
+  position:fixed;top:0;left:0;right:0;height:80px;background:#0e0e0e;border-bottom:2px solid rgba(255,145,77,.08);display:flex;align-items:center;justify-content:space-between;padding:0 26px;z-index:1000
+}
+.header .brand{display:flex;align-items:center;gap:14px;font-weight:800;letter-spacing:.6px}
+.header .brand img{height:56px;width:auto;border-radius:8px}
+.nav{display:flex;align-items:center;gap:20px;font-weight:700}
+.nav a{opacity:.95;padding:8px 12px;border-radius:8px}
+.nav a:hover{background:rgba(255,145,77,.06);color:var(--accent)}
+.container{max-width:1200px;margin:120px auto 80px;padding:0 20px}
+.title{font-size:40px;letter-spacing:1px;text-align:left;margin:6px 0 18px;color:var(--accent);font-weight:900}
 .section{margin-top:28px}
-.grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:22px}
-@media(min-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(min-width:1020px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.card{position:relative;background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
-.card .thumb{position:relative;height:190px;background:#0f1520}
-.card .thumb .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.05) contrast(1.05)}
-.card .thumb::after{content:"";position:absolute;left:0;right:0;bottom:0;height:70px;background:linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,0))}
+.grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:20px}
+@media(min-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border-radius:18px;box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(255,145,77,0.04)}
+.card .thumb{position:relative;height:200px;background:#0f1520}
+.card .thumb .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.85) saturate(1.05)}
+.card .thumb::after{content:"";position:absolute;left:0;right:0;bottom:0;height:80px;background:linear-gradient(to top,rgba(0,0,0,.65),rgba(0,0,0,0))}
 .card .content{position:absolute;left:18px;right:18px;bottom:14px;z-index:2}
 .row{display:flex;align-items:center;gap:10px}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;opacity:.95}
-.badge .dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
-.teams{display:flex;align-items:center;gap:10px}
-.flag{height:46px;width:auto;border-radius:4px;box-shadow:0 4px 10px rgba(0,0,0,.35)}
-.league{height:28px;border-radius:5px}
-.name{margin:6px 0 2px;font-weight:800;font-size:18px}
-.meta{opacity:.9;font-size:14px}
-.footer{max-width:1150px;margin:10px auto 40px;padding:0 20px;text-align:center;opacity:.7}
-.button{background:var(--primary);color:#fff;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
-.form{background:var(--panel);border:1px solid var(--muted);border-radius:16px;padding:16px;margin-top:18px}
+.badge{display:inline-flex;align-items:center;gap:8px;font-size:13px;opacity:.95}
+.badge .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.teams{display:flex;align-items:center;gap:12px}
+.flag{height:56px;width:auto;border-radius:6px;box-shadow:0 6px 16px rgba(0,0,0,.45);border:2px solid rgba(255,255,255,0.03)}
+.league{height:30px;border-radius:6px}
+.name{margin:6px 0 2px;font-weight:900;font-size:20px;color:#fff}
+.meta{opacity:.95;font-size:14px;color:rgba(255,255,255,0.9)}
+.footer{max-width:1200px;margin:14px auto 40px;padding:0 20px;text-align:center;opacity:.75}
+.button{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 6px 18px rgba(255,145,77,.08)}
+.form{background:var(--panel);border:1px solid var(--muted);border-radius:14px;padding:14px;margin-top:18px}
 .form .row{gap:12px;flex-wrap:wrap}
 .form input,.form select{background:#0e0e0e;border:1px solid #242424;border-radius:10px;color:#eaeef5;padding:10px 12px;outline:none}
-.form input:focus{border-color:#2f5cff}
+.form input:focus{border-color:var(--accent)}
 .form .full{width:100%}
 .form .half{width:calc(50% - 6px)}
 .form .third{width:calc(33.333% - 8px)}
@@ -43,7 +55,7 @@ a{text-decoration:none;color:inherit}
 .actions{display:flex;gap:8px;margin-top:10px}
 .edit{background:#ffb020}
 .delete{background:#ff5454}
-.login{max-width:400px;margin:140px auto 60px;padding:20px;background:var(--panel);border:1px solid var(--muted);border-radius:14px}
+.login{max-width:420px;margin:140px auto 60px;padding:20px;background:var(--panel);border:1px solid var(--muted);border-radius:14px}
 .login h2{text-align:center;margin:0 0 12px}
 .login input{width:100%;background:#0e0e0e;border:1px solid #242424;border-radius:10px;color:#eaeef5;padding:12px;outline:none;margin-top:10px}
 .login .button{width:100%;margin-top:12px}
