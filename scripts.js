@@ -7,12 +7,25 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-function h(el, attrs={}, children=[]) {
-  const e=document.createElement(el);
-  Object.entries(attrs).forEach(([k,v])=>{ if(k==="class") e.className=v; else if(k==="style") e.style.cssText=v; else e.setAttribute(k,v); });
-  children.forEach(c=>{ if(typeof c==="string") e.appendChild(document.createTextNode(c)); else if(c) e.appendChild(c); });
+function h(el, attrs = {}, children = []) {
+  const e = document.createElement(el);
+  Object.entries(attrs || {}).forEach(([k, v]) => {
+    if (k === "class") e.className = v;
+    else if (k === "style") e.style.cssText = v;
+    else e.setAttribute(k, v);
+  });
+  
+  // Ošetření vstupu – children může být string, element, nebo pole
+  if (!Array.isArray(children)) children = [children];
+  
+  children.forEach(c => {
+    if (typeof c === "string") e.appendChild(document.createTextNode(c));
+    else if (c instanceof Node) e.appendChild(c);
+  });
+  
   return e;
 }
+
 
 function fmtCountdown(ts) {
   const t = new Date(ts).getTime() - Date.now();
