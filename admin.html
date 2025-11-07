@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hokejíček | Admin</title>
+<link rel="icon" href="https://hokejicek.site/files/png/hokejicek-logo.png">
+<link rel="stylesheet" href="./style.css">
+<script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
+</head>
+<body>
+<header class="header">
+  <div class="brand">
+    <img src="https://hokejicek.site/files/png/hokejicek-logo.png" alt="Hokejíček">
+  </div>
+  <nav class="nav">
+    <a href="./index.html">Hlavní stránka</a>
+    <a href="./index.html#all">Přenosy</a>
+    <a href="./gdpr.html">GDPR</a>
+    <a href="./admin.html">Admin</a>
+  </nav>
+</header>
+
+<div id="login" class="login">
+  <h2>Přihlášení</h2>
+  <input id="admin-pass" type="password" placeholder="Heslo">
+  <button id="btn-login" class="button">Přihlásit</button>
+</div>
+
+<main id="admin-app" class="container hidden">
+  <h1 class="title">Správa přenosů</h1>
+
+  <div class="form">
+    <input id="m-id" type="hidden">
+    <div class="row">
+      <input id="team1" class="half" placeholder="Tým 1">
+      <input id="team2" class="half" placeholder="Tým 2">
+      <input id="logo1" class="half" placeholder="Logo týmu 1 (URL)">
+      <input id="logo2" class="half" placeholder="Logo týmu 2 (URL)">
+      <input id="leagueLogo" class="half" placeholder="Logo soutěže (URL)">
+      <input id="bg" class="half" placeholder="Pozadí karty (URL)">
+      <input id="channel" class="half" placeholder="TV / soutěž">
+      <input id="startISO" class="half" type="datetime-local" placeholder="Začátek">
+      <input id="streamUrl" class="full" placeholder="Odkaz na přenos">
+    </div>
+    <div class="kat">
+      <label><input id="cat-featured" type="checkbox"> Nejzajímavější</label>
+      <label><input id="cat-all" type="checkbox" checked> Všechny přenosy</label>
+    </div>
+    <div class="actions">
+      <button id="btn-save" class="button">Uložit</button>
+      <button id="btn-new" class="button">Nový</button>
+    </div>
+  </div>
+
+  <section class="section">
+    <h1 class="title">Zapsané zápasy</h1>
+    <div id="admin-list" class="grid"></div>
+  </section>
+</main>
+
+<script type="module">
+  import { mountAdmin } from "./scripts.js";
+  const ADMIN_PASSWORD = "HkJc-72Qf9Mx";
+  mountAdmin(ADMIN_PASSWORD);
+</script>
+
+<script type="text/javascript">
+    aclib.runAutoTag({
+        zoneId: 'zitkptgwk8',
+    });
+</script>
+</body>
+</html>
