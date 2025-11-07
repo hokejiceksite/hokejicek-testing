@@ -1,9 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue, push, set, update, remove, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
 function h(el, attrs={}, children=[]) {
   const e=document.createElement(el);
@@ -59,11 +61,49 @@ export function mountPublic() {
   });
 }
 
-export function mountAdmin(password) {
-  const login = document.getElementById("login");
+async function checkAdmin(uid){
+  const snap = await get(ref(db,`admins/${uid}`));
+  return !!snap.val();
+}
+
+export function mountAdmin() {
+  const loginEl = document.getElementById("login");
   const appWrap = document.getElementById("admin-app");
+  const inputEmail = document.getElementById("admin-email");
   const inputPass = document.getElementById("admin-pass");
-  document.getElementById("btn-login").onclick=()=>{ if(inputPass.value===password){login.classList.add("hidden");appWrap.classList.remove("hidden");} else {alert("Špatné heslo");}};
+  const btnSignIn = document.getElementById("btn-login");
+  const btnSignOut = document.getElementById("btn-logout");
+
+  btnSignIn.onclick = async ()=>{
+    try{
+      const cred = await signInWithEmailAndPassword(auth, inputEmail.value.trim(), inputPass.value);
+      const uid = cred.user.uid;
+      const ok = await checkAdmin(uid);
+      if(!ok){ await signOut(auth); alert("Tento účet není admin. Kontaktuj vlastníka."); return; }
+      loginEl.classList.add("hidden");
+      appWrap.classList.remove("hidden");
+      initAdminApp();
+    }catch(e){ alert("Přihlášení selhalo: "+e.message); }
+  };
+
+  btnSignOut.onclick = async ()=>{
+    await signOut(auth);
+    appWrap.classList.add("hidden");
+    loginEl.classList.remove("hidden");
+  };
+
+  onAuthStateChanged(auth, async user=>{
+    if(user){
+      const ok = await checkAdmin(user.uid);
+      if(ok){ loginEl.classList.add("hidden"); appWrap.classList.remove("hidden"); initAdminApp(); }
+      else { await signOut(auth); }
+    } else {
+      appWrap.classList.add("hidden"); loginEl.classList.remove("hidden");
+    }
+  });
+}
+
+function initAdminApp(){
   const form = {
     id: document.getElementById("m-id"),
     team1: document.getElementById("team1"),
@@ -80,10 +120,10 @@ export function mountAdmin(password) {
   };
   function clearForm(){Object.values(form).forEach(i=>{if(i.tagName==="INPUT")i.value="";});form.catFeatured.checked=false;form.catAll.checked=true;form.id.value="";}
   function readForm(){return {team1:form.team1.value.trim(),team2:form.team2.value.trim(),logo1:form.logo1.value.trim(),logo2:form.logo2.value.trim(),leagueLogo:form.leagueLogo.value.trim(),bg:form.bg.value.trim(),startISO:new Date(form.startISO.value).toISOString(),channel:form.channel.value.trim(),streamUrl:form.streamUrl.value.trim(),categories:{featured:form.catFeatured.checked,all:form.catAll.checked},createdAt:Date.now()};}
-  function fillForm(m){form.id.value=m.id||"";form.team1.value=m.team1||"";form.team2.value=m.team2||"";form.logo1.value=m.logo1||"";form.logo2.value=m.logo2||"";form.leagueLogo.value=m.leagueLogo||"";form.bg.value=m.bg||"";form.startISO.value=m.startISO?new Date(m.startISO).toISOString().slice(0,16):"";form.channel.value=m.channel||"";form.streamUrl.value=m.streamUrl||"";form.catFeatured.checked=!!(m.categories&&m.categories.featured);form.catAll.checked=!(m.categories)&&true; if(m.categories) form.catAll.checked=!!m.categories.all;}
+  function fillForm(m){form.id.value=m.id||"";form.team1.value=m.team1||"";form.team2.value=m.team2||"";form.logo1.value=m.logo1||"";form.logo2.value=m.logo2||"";form.leagueLogo.value=m.leagueLogo||"";form.bg.value=m.bg||"";form.startISO.value=m.startISO?new Date(m.startISO).toISOString().slice(0,16):"";form.channel.value=m.channel||"";form.streamUrl.value=m.streamUrl||"";form.catFeatured.checked=!!(m.categories&&m.categories.featured);form.catAll.checked=!!(m.categories&&m.categories.all);}
   document.getElementById("btn-save").onclick=async()=>{
     const data=readForm();
-    if(!data.team1||!data.team2||!data.startISO){alert("Vyplň název týmů a datum.");return;}
+    if(!data.team1||!data.team2||!data.startISO){alert("Vyplň názvy týmů a datum.");return;}
     if(form.id.value){await update(ref(db,"matches/"+form.id.value),data);} else {const r=push(ref(db,"matches"));await set(r,data);}
     clearForm();
   };
