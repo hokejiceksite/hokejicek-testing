@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hokejíček | Přenosy</title>
+<link rel="stylesheet" href="style.css">
+<script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <div class="inner">
+    <div class="brand">HOKEJICEK</div>
+    <div class="menu">
+      <a href="index.html">Hlavní stránka</a>
+      <a href="index.html#all">Přenosy</a>
+      <a href="#">GDPR</a>
+      <a href="admin.html">Admin</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <h1 class="h1">Nejzajímavější zápasy</h1>
+  <div id="featured" class="grid section"></div>
+
+  <h1 id="all" class="h1">Všechny přenosy</h1>
+  <div id="allGrid" class="grid section"></div>
+</div>
+
+<div class="footer">© 2025 Hokejíček – všechna práva vyhrazena.</div>
+
+<script src="firebase-config.js"></script>
+<script>
+const app=firebase.initializeApp(window.FIREBASE_CONFIG);
+const db=firebase.database();
+
+function cardHtml(m){
+  const id='t_'+m.id;
+  return `
+  <a href="${m.streamUrl||'#'}" class="card">
+    <img src="${m.bg||''}" class="bg" alt="">
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="row">
+        ${m.logo1?`<img class="flag" src="${m.logo1}" alt="">`:''}
+        ${m.leagueLogo?`<img class="league" src="${m.leagueLogo}" alt="">`:''}
+        ${m.logo2?`<img class="flag" src="${m.logo2}" alt="">`:''}
+      </div>
+      <h3 class="title">${m.team1} vs ${m.team2}</h3>
+      <div class="meta">Start: ${new Date(m.startISO).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}${m.channel?` • ${m.channel}`:''}</div>
+      <div class="timer"><span class="dot"></span><span
